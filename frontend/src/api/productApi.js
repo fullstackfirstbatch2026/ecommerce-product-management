@@ -19,3 +19,27 @@ export async function getProduct(id) {
 
   return response.json()
 }
+
+export async function getAveragePrice() {
+  const response = await fetch(
+    `${API_URL}/price/average`
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to load average price')
+  }
+
+  return response.json()
+}
+
+export async function getProductsAboveAveragePrice() {
+  const response = await fetch(
+    `${API_URL}/price/above-average`
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to load above-average products')
+  }
+
+  return response.json()
+}

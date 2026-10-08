@@ -30,4 +30,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             )
             """, nativeQuery = true)
     List<Product> findProductsAboveAveragePrice();
+
+    @Query(value = """
+            SELECT AVG(price)
+            FROM products
+            """, nativeQuery = true)
+    Double findAveragePrice();
 }

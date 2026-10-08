@@ -36,4 +36,7 @@ public List<Object[]> getProductsWithCategory() {
     public List<Product> getProductsAboveAveragePrice() {
     return productRepository.findProductsAboveAveragePrice();
 }
+public Double getAveragePrice() {
+    return productRepository.findAveragePrice();
+}
 }

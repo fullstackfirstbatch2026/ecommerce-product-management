@@ -1,6 +1,11 @@
+
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getProducts } from '../api/productApi'
+import {
+  getProducts,
+  getAveragePrice,
+  getProductsAboveAveragePrice
+} from '../api/productApi'
 
 const demoProducts = [
   {
@@ -81,24 +86,51 @@ function ProductsPage() {
   const [products, setProducts] = useState(demoProducts)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
+  const [averagePrice, setAveragePrice] = useState(0)
+  const [aboveAverageProducts, setAboveAverageProducts] = useState([])
 
   useEffect(() => {
     getProducts()
       .then(data => {
         const mapped = data.map((product, index) => ({
           ...product,
+          id: product.productId,
           rating: 4.7 + (index % 3) * 0.1,
           image: demoProducts[index % demoProducts.length].image
         }))
+
         setProducts(mapped)
       })
-      .catch(() => {})
+      .catch(error => {
+        console.error('Failed to load products:', error)
+      })
+
+    getAveragePrice()
+      .then(data => {
+        setAveragePrice(data)
+      })
+      .catch(error => {
+        console.error('Failed to load average price:', error)
+      })
+
+    getProductsAboveAveragePrice()
+      .then(data => {
+        setAboveAverageProducts(data)
+      })
+      .catch(error => {
+        console.error(
+          'Failed to load above-average products:',
+          error
+        )
+      })
   }, [])
 
   const categories = [
     'All',
     ...new Set(
-      products.map(product => product.category?.name).filter(Boolean)
+      products
+        .map(product => product.category?.name)
+        .filter(Boolean)
     )
   ]
 
@@ -115,9 +147,19 @@ function ProductsPage() {
     <main className="page">
       <div className="catalog-heading">
         <div>
-          <span className="section-label">THE COLLECTION</span>
+          <span className="section-label">
+            THE COLLECTION
+          </span>
+
           <h1>Explore everything.</h1>
-          <p>Digital resources curated for people who create.</p>
+
+          <p>
+            Digital resources curated for people who create.
+          </p>
+
+          <p>
+            Average product price: ₹{averagePrice.toFixed(2)}
+          </p>
         </div>
 
         <div className="catalog-count">
@@ -129,6 +171,7 @@ function ProductsPage() {
       <div className="catalog-tools">
         <div className="catalog-search">
           <span>⌕</span>
+
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -140,7 +183,11 @@ function ProductsPage() {
           {categories.map(item => (
             <button
               key={item}
-              className={category === item ? 'filter active' : 'filter'}
+              className={
+                category === item
+                  ? 'filter active'
+                  : 'filter'
+              }
               onClick={() => setCategory(item)}
             >
               {item}
@@ -157,8 +204,13 @@ function ProductsPage() {
             key={product.id}
           >
             <div className="catalog-image">
-              <img src={product.image} alt={product.name} />
+              <img
+                src={product.image}
+                alt={product.name}
+              />
+
               <button
+                type="button"
                 className="heart-button"
                 onClick={e => e.preventDefault()}
               >
@@ -167,17 +219,73 @@ function ProductsPage() {
             </div>
 
             <div className="catalog-info">
-              <span>{product.category?.name || 'Digital Resource'}</span>
+              <span>
+                {product.category?.name || 'Digital Resource'}
+              </span>
+
               <h3>{product.name}</h3>
 
               <div className="catalog-meta">
                 <strong>₹{product.price}</strong>
-                <small>★ {product.rating || 4.8}</small>
+
+                <small>
+                  ★ {product.rating || 4.8}
+                </small>
               </div>
             </div>
           </Link>
         ))}
       </div>
+
+      <section className="above-average-section">
+        <div className="catalog-heading">
+          <div>
+            <span className="section-label">
+              SUBQUERY RESULT
+            </span>
+
+            <h2>Above Average Price Products</h2>
+
+            <p>
+              Products priced higher than the average
+              product price.
+            </p>
+          </div>
+        </div>
+
+        <div className="catalog-grid">
+          {aboveAverageProducts.map(product => (
+            <Link
+              to={`/product/${product.productId}`}
+              className="catalog-card"
+              key={product.productId}
+            >
+              <div className="catalog-image">
+                <img
+                  src={
+                    demoProducts[
+                      product.productId % demoProducts.length
+                    ].image
+                  }
+                  alt={product.name}
+                />
+              </div>
+
+              <div className="catalog-info">
+                <span>
+                  {product.category?.name || 'Digital Resource'}
+                </span>
+
+                <h3>{product.name}</h3>
+
+                <div className="catalog-meta">
+                  <strong>₹{product.price}</strong>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
     </main>
   )
 }

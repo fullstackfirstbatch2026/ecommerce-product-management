@@ -51,4 +51,8 @@ public List<Object[]> getProductsWithCategory() {
 public List<Product> getProductsAboveAveragePrice() {
     return productService.getProductsAboveAveragePrice();
 }
+@GetMapping("/price/average")
+public Double getAveragePrice() {
+    return productService.getAveragePrice();
+}
 }
